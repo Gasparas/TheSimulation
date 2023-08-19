@@ -4,9 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Falling Balls with p5.js and Matter.js</title>
+    <title>Falling Balls with p5.js</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.min.js"></script>
     <style>
         body,
         html {
@@ -19,85 +18,86 @@
 
 <body>
     <script>
-        let Engine = Matter.Engine,
-            World = Matter.World,
-            Bodies = Matter.Bodies;
-
-        let engine;
         let balls = [];
-        let ground;
-        let sensorY;
-        let bgColor = 0;
+        let sensorY; // Y position of the sensor
+        let bgColor = 0; // Default background color
 
-        let colorPaletteTop = ['#EAC696', '#C8AE7D', '#765827', '#65451F'];
-        let colorPalette = ['#FFFFFF'];
+        let colorPaletteTop = ['#EAC696', '#C8AE7D', '#765827', '#65451F']; // Example color palette
+        let colorPalette = ['#FFFFFF']; // Example color palette
+
 
         function setup() {
             createCanvas(windowWidth, windowHeight);
-            engine = Engine.create();
-
-            sensorY = height / 1.3;
-
-            // Create ground barrier using Matter.js
-            ground = Bodies.rectangle(width / 2, height, width, 20, {
-                isStatic: true
-            });
-            // World.add(engine.world, ground);
+            sensorY = height / 2; // Set sensor to the middle of the canvas
         }
 
         function draw() {
             background(bgColor);
 
-            // Update Matter.js engine
-            Engine.update(engine);
-
             // Draw the sensor line
-            stroke(0, 0, 0);
+            stroke(255, 255, 255); // Color for the sensor line
             line(0, sensorY, width, sensorY);
 
             // Randomly spawn balls at the top
-            if (random() < 0.2) {
+            if (random() < 0.03) {
                 let chosenColor = random(colorPaletteTop);
-                let ball = new Ball(random(width), random(-100, -20), random(10, 30), chosenColor);
-                balls.push(ball);
-                World.add(engine.world, ball.body);
+                balls.push(new Ball(random(width), 0, random(10, 30), chosenColor));
             }
 
-            // Display balls
+            // Update and display balls
             for (let i = balls.length - 1; i >= 0; i--) {
+                balls[i].update();
                 balls[i].display();
 
                 // Check if ball crosses the sensor
-                if (balls[i].body.position.y > sensorY && balls[i].body.position.y - balls[i].body.speed <= sensorY) {
-                    balls[i].color = random(colorPalette);
+                if (balls[i].y > sensorY && balls[i].y - balls[i].speed <= sensorY) {
+                    // bgColor = 20; // Change background color when ball crosses sensor
                 }
 
                 // Remove balls that are off the canvas
-                if (balls[i].body.position.y > height + balls[i].radius) {
-                    World.remove(engine.world, balls[i].body);
+                if (balls[i].y > height + balls[i].radius) {
                     balls.splice(i, 1);
                 }
             }
+
+            // Reset background color after a short time
+            // if (bgColor === 20) {
+            //     setTimeout(() => {
+            //         bgColor = 0;
+            //     }, 100);
+            // }
         }
 
         function windowResized() {
             resizeCanvas(windowWidth, windowHeight);
-            sensorY = height / 2;
+            sensorY = height / 2; // Adjust sensor position after resizing
         }
 
         class Ball {
             constructor(x, y, radius, color) {
+                this.x = x;
+                this.y = y;
                 this.radius = radius;
+                this.speed = random(2, 5);
                 this.color = color;
-                this.body = Bodies.circle(x, y, radius, {
-                    restitution: 0.8
-                });
+                this.passedSensor = false; // Flag to check if the ball has already passed the sensor
+            }
+
+            update() {
+                this.y += this.speed;
+          
+
+                // Check if ball crosses the sensor and hasn't already passed it
+                if (!this.passedSensor && this.y > sensorY) {
+                    this.color = random(colorPalette); // Change the ball's color
+                    this.passedSensor = true; // Set the flag to true
+                }
             }
 
             display() {
-                fill(this.color);
+                fill(this.color); // Use the color when displaying
                 noStroke();
-                ellipse(this.body.position.x, this.body.position.y, this.radius * 2);
+                ellipse(this.x, this.y, this.radius * 2);
             }
         }
 

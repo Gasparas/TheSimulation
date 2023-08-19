@@ -29,14 +29,16 @@
         let sensorY;
         let bgColor = 0;
 
-        let colorPaletteTop = ['#EAC696', '#C8AE7D', '#765827', '#65451F'];
-        let colorPalette = ['#FFFFFF'];
+        let colorPaletteTop = ['#6F61C0', '#A084E8', '#8BE8E5', '#D5FFE4'];
+        let colorPalette = ['#FFE75E', '#FEB72B'];
 
         function setup() {
             createCanvas(windowWidth, windowHeight);
             engine = Engine.create();
 
-            sensorY = height / 1.3;
+            engine.world.gravity.y = 0.35; // gravity
+
+            sensorY = height / 2;
 
             // Create ground barrier using Matter.js
             ground = Bodies.rectangle(width / 2, height, width, 20, {
@@ -52,13 +54,13 @@
             Engine.update(engine);
 
             // Draw the sensor line
-            stroke(0, 0, 0);
+            stroke(255, 255, 255);
             line(0, sensorY, width, sensorY);
 
             // Randomly spawn balls at the top
-            if (random() < 0.2) {
+            if (random() < 0.04) {
                 let chosenColor = random(colorPaletteTop);
-                let ball = new Ball(random(width), random(-100, -20), random(10, 30), chosenColor);
+                let ball = new Ball(random(width), random(-10, -30), random(10, 30), chosenColor);
                 balls.push(ball);
                 World.add(engine.world, ball.body);
             }
@@ -70,6 +72,8 @@
                 // Check if ball crosses the sensor
                 if (balls[i].body.position.y > sensorY && balls[i].body.position.y - balls[i].body.speed <= sensorY) {
                     balls[i].color = random(colorPalette);
+                    // bgColor = '#322653'; // Change background color when ball crosses sensor
+
                 }
 
                 // Remove balls that are off the canvas
@@ -78,6 +82,13 @@
                     balls.splice(i, 1);
                 }
             }
+
+            //  Reset background color after a short time
+            // if (bgColor === '#322653') {
+            //     setTimeout(() => {
+            //         bgColor = 0;
+            //     }, 50);
+            // }
         }
 
         function windowResized() {
