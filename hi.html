@@ -1,1 +1,68 @@
-<p>hi</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Falling Balls with p5.js</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        let balls = [];
+
+        function setup() {
+            createCanvas(windowWidth, windowHeight);
+        }
+
+        function draw() {
+            background(220);
+
+            // Randomly spawn balls at the top
+            if (random() < 0.05) { // 5% chance every frame
+                balls.push(new Ball(random(width), 0, random(10, 30)));
+            }
+
+            // Update and display balls
+            for (let i = balls.length - 1; i >= 0; i--) {
+                balls[i].update();
+                balls[i].display();
+
+                // Remove balls that are off the canvas
+                if (balls[i].y > height + balls[i].radius) {
+                    balls.splice(i, 1);
+                }
+            }
+        }
+
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+        }
+
+        class Ball {
+            constructor(x, y, radius) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.speed = random(2, 5);
+            }
+
+            update() {
+                this.y += this.speed;
+            }
+
+            display() {
+                fill(50, 150, 255);
+                noStroke();
+                ellipse(this.x, this.y, this.radius * 2);
+            }
+        }
+    </script>
+</body>
+</html>
