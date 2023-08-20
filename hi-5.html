@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Falling Balls with p5.js and Matter.js</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.min.js"></script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        let Engine = Matter.Engine,
+            World = Matter.World,
+            Bodies = Matter.Bodies;
+
+        let engine;
+        let bgColor = 0;
+
+
+        function setup() {
+            createCanvas(windowWidth, windowHeight);
+            engine = Engine.create();
+
+            engine.world.gravity.y =1; // gravity
+        }
+
+        function draw() {
+            background(bgColor);
+
+            // Update Matter.js engine
+            Engine.update(engine);
+        }
+
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+            sensorY = height / 2;
+        }
+        
+
+    </script>
+</body>
+
+</html>
