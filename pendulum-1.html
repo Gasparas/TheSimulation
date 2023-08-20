@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendulum and mouse interaction</title>
+
+    <!-- Including p5.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+
+    <!-- Including Matter.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.min.js"></script>
+
+    <style>
+        /* Styling to ensure canvas fits the entire viewport without scrollbars */
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        // Matter.js setup
+        // Creating aliases for frequently used Matter.js modules for easier reference
+        let Engine = Matter.Engine,
+            World = Matter.World,
+            Bodies = Matter.Bodies;
+
+        // Initializing the physics engine
+        let engine;
+
+        // Additional Matter.js aliases for creating Pendulum constraints
+        let Constraint = Matter.Constraint,
+            Mouse = Matter.Mouse,
+            MouseConstraint = Matter.MouseConstraint;
+
+        let pendulum;
+        let mConstraint; // For mouse interaction
+        let canvasmouse;
+
+        // Default background color for p5.js canvas
+        let bgColor = 0;
+
+        let sensor;
+        let sensorX; // X position of the sensor
+
+        // p5.js Pendulum ball animation
+        let numLines = 10; // Number of lines to draw around the pendulum ball
+        let lineLengths = []; // Array to store the lengths of the lines
+        let animationSpeed = 0.1; // Speed of the animation
+        // // Initialize line lengths
+        // for (let i = 0; i < numLines; i++) {
+        //     lineLengths.push(random(10, 50)); // Random lengths between 10 and 50
+        // }
+
+        // p5.js setup function - runs once at the beginning
+        function setup() {
+            // p5.js function to create a canvas that fills the window
+            let canvas = createCanvas(windowWidth, windowHeight);
+
+            // Matter.js engine creation
+            engine = Engine.create();
+
+            // Setting gravity for the Matter.js world (affects all physics bodies)
+            engine.world.gravity.y = 1; // Default gravity value in the y-direction
+
+            // Create the Pendulum
+            pendulum = new Pendulum(width / 2, 120, 400); // Positioned at the center of the canvas
+
+            // Add mouse control
+            // Adjusting mouse creation for p5.js canvas
+            canvasmouse = Mouse.create(canvas.elt);  // Use the p5.js canvas element
+            canvasmouse.pixelRatio = pixelDensity();
+            let options = {
+                mouse: canvasmouse
+            };
+            mConstraint = MouseConstraint.create(engine, options);
+            World.add(engine.world, mConstraint);
+
+            // Create an invisible sensor object in the center of the canvas
+            sensorX = width / 2; // Set sensor to the middle of the canvas
+            sensor = Bodies.rectangle(sensorX, height / 2, 10, height, { isSensor: true, isStatic: true });
+            World.add(engine.world, sensor);
+
+            Matter.Events.on(engine, 'collisionStart', function (event) {
+                let pairs = event.pairs;
+
+                for (let i = 0; i < pairs.length; i++) {
+                    if ((pairs[i].bodyA === pendulum.body && pairs[i].bodyB === sensor) ||
+                        (pairs[i].bodyB === pendulum.body && pairs[i].bodyA === sensor)) {
+                        //action
+                        pendulum.trigger();
+                    }
+                }
+            });
+
+        }
+
+        // p5.js draw function - runs continuously to update the canvas
+        function draw() {
+            // p5.js function to set the canvas background color
+            background(bgColor);
+
+            // Updating the Matter.js physics engine
+            Engine.update(engine);
+
+            // Display the pendulum
+            pendulum.display();
+
+            // Display mouse constraint (optional, but helps visualize the interaction)
+            if (mConstraint.body) {
+                let pos = mConstraint.body.position;
+                let offset = mConstraint.constraint.pointB;
+                let m = mConstraint.mouse.position;
+                stroke(0, 255, 0);
+                line(pos.x + offset.x, pos.y + offset.y, m.x, m.y);
+            }
+
+            // Draw the sensor line for visualization
+            stroke(0, 0, 255); // Color for the sensor line
+            line(sensorX, 0, sensorX, height);
+        }
+
+        // p5.js function that's triggered when the window is resized
+        function windowResized() {
+            // p5.js function to resize the canvas to fit the window
+            resizeCanvas(windowWidth, windowHeight);
+        }
+
+        function mousePressed() {
+            if (myPendulum.contains(mouseX, mouseY)) {
+                myPendulum.trigger();
+            }
+        }
+
+        class Pendulum {
+            constructor(x, y, l) {
+                this.origin = createVector(x, y);
+                this.length = l;
+                this.angle = PI / 4;
+                this.triggered = false; // Add the triggered property
+
+                let options = {
+                    restitution: 1,
+                    angle: this.angle,
+                    friction: 0,
+                    frictionAir: 0,
+                    mass: 1
+                };
+
+                this.body = Bodies.circle(x + l * sin(this.angle), y + l * cos(this.angle), 25, options);
+                this.constraint = Constraint.create({
+                    pointA: { x: x, y: y },
+                    bodyB: this.body,
+                    length: l,
+                    stiffness: 1
+                });
+
+                World.add(engine.world, [this.body, this.constraint]);
+            }
+
+            display() {
+                fill(255);
+                stroke(255);
+                strokeWeight(2);
+                line(this.origin.x, this.origin.y, this.body.position.x, this.body.position.y);
+                // Change fill color based on the triggered state
+                fill(this.triggered ? color(0, 0, 0) : color(255));
+
+                ellipse(this.body.position.x, this.body.position.y, 50);
+            }
+
+            trigger() {
+                this.triggered = !this.triggered; // Toggle the triggered state
+            }
+
+            contains(x, y) {
+                let d = dist(x, y, this.body.position.x, this.body.position.y);
+                return d < 25; // Return true if the point is inside the pendulum's circle
+            }
+        }
+    </script>
+</body>
+
+</html>

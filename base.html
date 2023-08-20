@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project with p5.js and Matter.js</title>
+
+    <!-- Including p5.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+
+    <!-- Including Matter.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.min.js"></script>
+
+    <style>
+        /* Styling to ensure canvas fits the entire viewport without scrollbars */
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        // Matter.js setup
+        // Creating aliases for frequently used Matter.js modules for easier reference
+        let Engine = Matter.Engine,
+            World = Matter.World,
+            Bodies = Matter.Bodies;
+
+        // Initializing the physics engine
+        let engine;
+        
+        // Default background color for p5.js canvas
+        let bgColor = 0;
+
+        // p5.js setup function - runs once at the beginning
+        function setup() {
+            // p5.js function to create a canvas that fills the window
+            createCanvas(windowWidth, windowHeight);
+
+            // Matter.js engine creation
+            engine = Engine.create();
+
+            // Setting gravity for the Matter.js world (affects all physics bodies)
+            engine.world.gravity.y = 1; // Default gravity value in the y-direction
+        }
+
+        // p5.js draw function - runs continuously to update the canvas
+        function draw() {
+            // p5.js function to set the canvas background color
+            background(bgColor);
+
+            // Updating the Matter.js physics engine
+            Engine.update(engine);
+        }
+
+        // p5.js function that's triggered when the window is resized
+        function windowResized() {
+            // p5.js function to resize the canvas to fit the window
+            resizeCanvas(windowWidth, windowHeight);
+        }
+    </script>
+</body>
+
+</html>
