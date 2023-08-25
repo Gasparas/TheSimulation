@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project with p5.js and Matter.js</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.min.js"></script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        let Engine = Matter.Engine,
+            World = Matter.World,
+            Bodies = Matter.Bodies,
+            Body = Matter.Body;
+
+        let engine;
+        let barrierBodies = [];
+        let ball;
+        let bgColor = 220;
+
+        function setup() {
+            createCanvas(windowWidth, windowHeight);
+            engine = Engine.create();
+            engine.world.gravity.y = 0.5;
+
+            // Create the barrier using multiple static bodies to form a circle
+            let barrierRadius = 150;
+            let segments = 30;  // Increase the number of segments
+            for (let i = 0; i < segments; i++) {
+                let angle = TWO_PI / segments * i;
+                let x = width / 2 + barrierRadius * cos(angle);
+                let y = height / 2 + barrierRadius * sin(angle);
+                let segment = Bodies.circle(x, y, 7, {  // Increase the size of each segment
+                    isStatic: true,
+                    restitution: 1.4,  // Slightly reduce restitution
+                    friction: 2.4      // Add a bit of friction
+                });
+                barrierBodies.push(segment);
+                World.add(engine.world, segment);
+            }
+
+            // Create the ball
+            ball = Bodies.circle(width / 2, height / 2 - 50, 30, {  // Slightly reduce the ball's size
+                restitution: 1.2,  // Slightly reduce restitution
+                friction: 0.3,     // Add a bit of friction
+                frictionAir: 0.001
+            });
+            World.add(engine.world, ball);
+        }
+
+        function draw() {
+            background(bgColor);
+
+            // Display the barrier
+            fill(100);
+            for (let segment of barrierBodies) {
+                ellipse(segment.position.x, segment.position.y, 10);
+            }
+
+            // Display the ball
+            fill(255);
+            ellipse(ball.position.x, ball.position.y, 60);
+
+            Engine.update(engine);
+        }
+
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+        }
+    </script>
+</body>
+
+</html>
