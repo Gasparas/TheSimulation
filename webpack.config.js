@@ -9,7 +9,10 @@ module.exports = {
         path: path.resolve(__dirname, './src'),
         filename: 'index_bundle.js',
     },
-    plugins: [new HtmlWebpackPlugin()],
+    plugins: [new HtmlWebpackPlugin({
+        title: 'Your App Title', // This is used in the template
+        template: './src/templates/template-1.html' // Point to your custom template
+    })],
     module: {
         rules: [
             {

@@ -1,31 +1,25 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/sketch.js":
-/*!***********************!*\
-  !*** ./src/sketch.js ***!
-  \***********************/
+/***/ "./src/modules/fibonacci.js":
+/*!**********************************!*\
+  !*** ./src/modules/fibonacci.js ***!
+  \**********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ sketch)
+/* harmony export */   generateFibonacci: () => (/* binding */ generateFibonacci)
 /* harmony export */ });
-// import p5 from 'p5';
+// modules/fibonacci.js
 
-function sketch(p) {
-  p.setup = function () {
-    p.createCanvas(400, 400);
-    p.background(220);
-  };
-  p.draw = function () {
-    // ...
-  };
-  p.mousePressed = function () {
-    p.fill(p.random(255), p.random(255), p.random(255));
-    p.ellipse(p.mouseX, p.mouseY, 50, 50);
-  };
+function generateFibonacci(n) {
+  var fib = [0, 1];
+  for (var i = 2; i < n; i++) {
+    fib[i] = fib[i - 1] + fib[i - 2];
+  }
+  return fib;
 }
 
 /***/ }),
@@ -131,10 +125,45 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! p5 */ "./node_modules/p5/lib/p5.min.js");
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(p5__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _sketch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./sketch */ "./src/sketch.js");
+/* harmony import */ var _modules_fibonacci__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modules/fibonacci */ "./src/modules/fibonacci.js");
 
 
-new (p5__WEBPACK_IMPORTED_MODULE_0___default())(_sketch__WEBPACK_IMPORTED_MODULE_1__["default"]);
+var sequence;
+var currentCircle = 0; // Index to track the current circle to draw
+var nextDrawTime = 0; // Time to draw the next circle
+
+new (p5__WEBPACK_IMPORTED_MODULE_0___default())(function (sketch) {
+  sketch.setup = function () {
+    sketch.createCanvas(800, 800);
+    sketch.background(220);
+    sequence = (0,_modules_fibonacci__WEBPACK_IMPORTED_MODULE_1__.generateFibonacci)(10);
+  };
+  function startAnimation() {
+    sketch.draw = function () {
+      // sketch.background(220);
+
+      if (sketch.millis() > nextDrawTime) {
+        if (currentCircle < sequence.length) {
+          var x = sketch.width / 2;
+          var y = sketch.height / 2;
+          for (var i = 0; i <= currentCircle; i++) {
+            var diameter = sequence[i] * 20;
+            sketch.ellipse(x, y, diameter, diameter);
+
+            // Adjust the position for the next circle.
+            x += sequence[i] * 10;
+          }
+          currentCircle++;
+          nextDrawTime = sketch.millis() + 100; // Schedule the next circle draw 1 second later.
+        } else {
+          sketch.noLoop(); // Stops draw loop if all circles have been drawn.
+        }
+      }
+    };
+  }
+  // event listeners
+  document.getElementById('startButton').addEventListener('click', startAnimation);
+});
 })();
 
 /******/ })()
